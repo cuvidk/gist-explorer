@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card } from "semantic-ui-react";
+import { Card, Container, Header, Form } from "semantic-ui-react";
 import { v4 as uuid } from "uuid";
+import _ from "lodash";
 
 import { GistFile } from "../types/gist";
 import { Gist } from "./Gist";
@@ -10,6 +11,10 @@ export const GistList = () => {
   const [username, setUsername] = useState<string>();
   const [gistFiles, setGistFiles] = useState<GistFile[]>();
   const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    fetchGists();
+  }, [username]);
 
   // TODO: improve type of arg
   async function mapGistToGistFiles(gist: any): Promise<GistFile[]> {
@@ -26,7 +31,7 @@ export const GistList = () => {
   }
 
   async function fetchForks(gistId: string): Promise<string[]> {
-    const resp = await githubRequest(`get /gists/${gistId}/forks`, {
+    const resp = await githubRequest(`GET /gists/${gistId}/forks`, {
       per_page: 3,
     });
     if (200 !== resp.status) {
@@ -43,7 +48,7 @@ export const GistList = () => {
       path = `/users/${username}/gists`;
     }
 
-    const resp = await githubRequest(`get ${path}`, { per_page: 10 });
+    const resp = await githubRequest(`GET ${path}`, { per_page: 10 });
     if (200 !== resp.status) {
       console.log(resp);
       setError(`failed to fetch data: ${resp.status}`);
@@ -61,13 +66,25 @@ export const GistList = () => {
     setGistFiles(files);
   }
 
-  useEffect(() => {
-    fetchGists();
-  }, [username]);
-
   const items = gistFiles?.map((gistFile) => {
     return <Gist key={uuid()} gistFile={gistFile} />;
   });
 
-  return <Card.Group>{items}</Card.Group>;
+  const throttledChange = _.throttle((event) => {
+    setUsername(event.target.value);
+  }, 2000);
+
+  return (
+    <Container>
+      <Header content="Gist Explorer" />
+      <Form>
+        <Form.Input
+          placeholder="Search by username..."
+          icon="search"
+          onChange={throttledChange}
+        />
+      </Form>
+      <Card.Group>{items}</Card.Group>
+    </Container>
+  );
 };
