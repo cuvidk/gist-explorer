@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Card } from "semantic-ui-react";
+import { v4 as uuid } from "uuid";
 
 import { GistFile } from "../types/gist";
 import { Gist } from "./Gist";
@@ -62,20 +63,11 @@ export const GistList = () => {
 
   useEffect(() => {
     fetchGists();
+  }, [username]);
+
+  const items = gistFiles?.map((gistFile) => {
+    return <Gist key={uuid()} gistFile={gistFile} />;
   });
 
-  return (
-    <Card.Group>
-      {gistFiles
-        ? gistFiles.map((gistFile) => {
-            return (
-              <Gist
-                key={gistFile.owner + gistFile.filename}
-                gistFile={gistFile}
-              />
-            );
-          })
-        : ""}
-    </Card.Group>
-  );
+  return <Card.Group>{items}</Card.Group>;
 };
