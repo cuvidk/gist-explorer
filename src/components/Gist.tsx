@@ -14,11 +14,15 @@ export const Gist = (props: GistComponentProps) => {
   return (
     <Card fluid>
       <Card.Content>
-        <Card.Header>{gistFile.filename}</Card.Header>
+        <Card.Header>
+          {gistFile.owner}/{gistFile.filename}
+        </Card.Header>
         <Label content={gistFile.language} />
       </Card.Content>
       <Card.Content extra>
-        <Card.Description>Forks: {gistFile.forks.join(", ")}</Card.Description>
+        <Card.Description>
+          Forks: {gistFile.forks.length ? gistFile.forks.join(", ") : "None"}
+        </Card.Description>
       </Card.Content>
     </Card>
   );

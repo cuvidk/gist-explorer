@@ -1,34 +1,39 @@
 import React, { useEffect, useState } from "react";
-import { request } from "@octokit/request";
-import { OctokitResponse } from "@octokit/types";
 import { Card } from "semantic-ui-react";
 
 import { GistFile } from "../types/gist";
 import { Gist } from "./Gist";
+import { githubRequest } from "../utils/github";
 
 export const GistList = () => {
   const [username, setUsername] = useState<string>();
   const [gistFiles, setGistFiles] = useState<GistFile[]>();
   const [error, setError] = useState<string>();
 
-  async function mapGistsToGistFiles(
-    res: OctokitResponse<any, number>
-  ): Promise<GistFile[]> {
-    const files: GistFile[] = [
-      {
-        filename: "yada/tada/foo/bar.js",
-        language: "javascript",
-        owner: "cuvidk",
-        forks: ["awe", "www", "wqeqw"],
-      },
-      {
-        filename: "yada/tada/foo/bar.js",
-        language: "javascript",
-        owner: "cuvidk",
-        forks: ["awe", "www", "wqeqw"],
-      },
-    ];
-    return files;
+  // TODO: improve type of arg
+  async function mapGistToGistFiles(gist: any): Promise<GistFile[]> {
+    const gistId: string = gist.id;
+    const forks = await fetchForks(gistId);
+    return Object.values(gist.files).map((file: any): GistFile => {
+      return {
+        filename: file.filename as string,
+        language: (file.language as string) ?? "unknown",
+        owner: gist.owner.login as string,
+        forks: forks,
+      };
+    });
+  }
+
+  async function fetchForks(gistId: string): Promise<string[]> {
+    const resp = await githubRequest(`get /gists/${gistId}/forks`, {
+      per_page: 3,
+    });
+    if (200 !== resp.status) {
+      console.log(resp);
+      return [];
+    }
+
+    return resp.data.map((fork: any): string => fork.owner.login) as string[];
   }
 
   async function fetchGists() {
@@ -37,15 +42,22 @@ export const GistList = () => {
       path = `/users/${username}/gists`;
     }
 
-    const resp = await request(`GET ${path}`);
+    const resp = await githubRequest(`get ${path}`, { per_page: 10 });
     if (200 !== resp.status) {
       console.log(resp);
-      setError(`Failed to fetch data: ${resp.status}`);
+      setError(`failed to fetch data: ${resp.status}`);
       return;
     }
 
-    const gistFiles = await mapGistsToGistFiles(resp);
-    setGistFiles(gistFiles);
+    const files = (
+      await Promise.all(
+        resp.data.map((gist: any): Promise<GistFile[]> => {
+          return mapGistToGistFiles(gist);
+        })
+      )
+    ).flat() as GistFile[];
+
+    setGistFiles(files);
   }
 
   useEffect(() => {
@@ -56,7 +68,12 @@ export const GistList = () => {
     <Card.Group>
       {gistFiles
         ? gistFiles.map((gistFile) => {
-            return <Gist gistFile={gistFile} />;
+            return (
+              <Gist
+                key={gistFile.owner + gistFile.filename}
+                gistFile={gistFile}
+              />
+            );
           })
         : ""}
     </Card.Group>
