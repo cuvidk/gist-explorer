@@ -69,6 +69,7 @@ export const GistList = () => {
         language: (file.language as string) ?? "unknown",
         owner: gist.owner.login as string,
         forks: forks,
+        content: "hello world",
       };
     });
   }
