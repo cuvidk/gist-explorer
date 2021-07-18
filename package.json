@@ -1,0 +1,25 @@
+{
+  "name": "gist-explorer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node ./dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cuvidk/gist-explorer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cuvidk/gist-explorer/issues"
+  },
+  "homepage": "https://github.com/cuvidk/gist-explorer#readme",
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  }
+}
