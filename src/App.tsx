@@ -1,7 +1,8 @@
 import React from "react";
+import Gist from "./components/gist";
 
 function App() {
-  return <h1>Hello world</h1>;
+  return <Gist />;
 }
 
 export default App;
