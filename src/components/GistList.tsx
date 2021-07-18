@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Card, Container, Header, Form } from "semantic-ui-react";
+import React, { useEffect, useRef, useState } from "react";
+import { Card, Container, Header, Form, Message } from "semantic-ui-react";
 import { v4 as uuid } from "uuid";
 import _ from "lodash";
 
@@ -15,6 +15,49 @@ export const GistList = () => {
   useEffect(() => {
     fetchGists();
   }, [username]);
+
+  const delayedSetUsername = useRef(
+    _.throttle((event) => {
+      setUsername(event.target.value);
+    }, 2000)
+  ).current;
+
+  async function fetchGists() {
+    let path: string = "/gists/public";
+    if (username) {
+      path = `/users/${username}/gists`;
+    }
+
+    setError("");
+    setGistFiles([]);
+
+    try {
+      const resp = await githubRequest(`GET ${path}`, { per_page: 10 });
+      if (200 !== resp.status) {
+        console.log(resp);
+        setError(`failed to fetch data: ${resp.status}`);
+        return;
+      }
+
+      const files = (
+        await Promise.all(
+          resp.data.map((gist: any): Promise<GistFile[]> => {
+            return mapGistToGistFiles(gist);
+          })
+        )
+      ).flat() as GistFile[];
+
+      setGistFiles(files);
+    } catch (err) {
+      // TODO: use a logger instead
+      console.log(err);
+      setError(
+        `An error occured: ${
+          process.env.NODE_ENV === "production" ? "see logs" : err
+        }`
+      );
+    }
+  }
 
   // TODO: improve type of arg
   async function mapGistToGistFiles(gist: any): Promise<GistFile[]> {
@@ -42,47 +85,20 @@ export const GistList = () => {
     return resp.data.map((fork: any): string => fork.owner.login) as string[];
   }
 
-  async function fetchGists() {
-    let path: string = "/gists/public";
-    if (username) {
-      path = `/users/${username}/gists`;
-    }
-
-    const resp = await githubRequest(`GET ${path}`, { per_page: 10 });
-    if (200 !== resp.status) {
-      console.log(resp);
-      setError(`failed to fetch data: ${resp.status}`);
-      return;
-    }
-
-    const files = (
-      await Promise.all(
-        resp.data.map((gist: any): Promise<GistFile[]> => {
-          return mapGistToGistFiles(gist);
-        })
-      )
-    ).flat() as GistFile[];
-
-    setGistFiles(files);
-  }
-
   const items = gistFiles?.map((gistFile) => {
     return <Gist key={uuid()} gistFile={gistFile} />;
   });
 
-  const throttledChange = _.throttle((event) => {
-    setUsername(event.target.value);
-  }, 2000);
-
   return (
     <Container>
       <Header content="Gist Explorer" />
-      <Form>
+      <Form error={!!error}>
         <Form.Input
           placeholder="Search by username..."
           icon="search"
-          onChange={throttledChange}
+          onChange={delayedSetUsername}
         />
+        <Message error header="Oups!" content={error} />
       </Form>
       <Card.Group>{items}</Card.Group>
     </Container>
