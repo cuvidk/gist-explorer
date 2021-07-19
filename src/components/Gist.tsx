@@ -8,6 +8,7 @@ import {
   Loader,
   Message,
 } from "semantic-ui-react";
+import hljs from "highlight.js";
 import { GistFile } from "../types/gist";
 
 type GistComponentProps = {
@@ -77,7 +78,12 @@ export const Gist = ({ gistFile }: GistComponentProps) => {
               <Loader active={loading} inline="centered" />
               <Message hidden={!error} content={error} negative />
               <pre>
-                <code className={gistFile.language}>{code}</code>
+                {/* <code
+                  dangerouslySetInnerHTML={{
+                    __html: hljs.highlightAuto(code).value,
+                  }}
+                ></code> */}
+                <code>{code}</code>
               </pre>
             </Accordion.Content>
           </Accordion>
