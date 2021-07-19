@@ -10,7 +10,6 @@ import {
 } from "semantic-ui-react";
 // import hljs from "highlight.js";
 import { GistFile } from "../types/gist";
-
 import "../style/gist.css";
 
 type GistComponentProps = {
@@ -37,12 +36,18 @@ export const Gist = ({ gistFile }: GistComponentProps) => {
       const resp = await axios({
         method: "GET",
         url: gistFile.rawUrl,
-        //url: "bushit",
         // add support for authenticated req
       });
 
       console.log(resp);
-      setCode(resp.data);
+
+      if (typeof resp.data === "string") {
+        setCode(resp.data);
+      } else {
+        // for whatever reason, if the raw file is a json,
+        // it's parsed to an object by the octokit request lib
+        setCode(JSON.stringify(resp.data));
+      }
     } catch (err) {
       // TODO: logger instead
       console.log(err);
