@@ -8,8 +8,10 @@ import {
   Loader,
   Message,
 } from "semantic-ui-react";
-import hljs from "highlight.js";
+// import hljs from "highlight.js";
 import { GistFile } from "../types/gist";
+
+import "../style/gist.css";
 
 type GistComponentProps = {
   gistFile: GistFile;
@@ -74,7 +76,7 @@ export const Gist = ({ gistFile }: GistComponentProps) => {
               <Icon name="dropdown" />
               View
             </Accordion.Title>
-            <Accordion.Content active={!!code}>
+            <Accordion.Content className="codeContainer" active={!!code}>
               <Loader active={loading} inline="centered" />
               <Message hidden={!error} content={error} negative />
               <pre>
