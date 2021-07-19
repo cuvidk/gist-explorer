@@ -3,5 +3,5 @@ export type GistFile = {
   language: string;
   owner: string;
   forks: string[];
-  content: string;
+  rawUrl: string;
 };

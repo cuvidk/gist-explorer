@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Card, Label, Accordion, Icon } from "semantic-ui-react";
+import axios from "axios";
+import {
+  Card,
+  Label,
+  Accordion,
+  Icon,
+  Loader,
+  Message,
+} from "semantic-ui-react";
 import { GistFile } from "../types/gist";
 
 type GistComponentProps = {
@@ -9,7 +17,41 @@ type GistComponentProps = {
 // TODO: narrow the type of the param
 // TODO: improve looks
 export const Gist = ({ gistFile }: GistComponentProps) => {
-  const [isCodeVisible, setCodeVisibility] = useState(false);
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleOnClick = async () => {
+    setError("");
+    setCode("");
+    setLoading(!loading);
+
+    if (!!code) {
+      return;
+    }
+
+    try {
+      const resp = await axios({
+        method: "GET",
+        url: gistFile.rawUrl,
+        //url: "bushit",
+        // add support for authenticated req
+      });
+
+      console.log(resp);
+      setCode(resp.data);
+    } catch (err) {
+      // TODO: logger instead
+      console.log(err);
+      setError(
+        `Failed to fetch file: ${
+          process.env.NODE_ENV === "production" ? "see logs" : err
+        } `
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card fluid>
@@ -25,18 +67,21 @@ export const Gist = ({ gistFile }: GistComponentProps) => {
         </Card.Description>
       </Card.Content>
       <Card.Content>
-        <Accordion>
-          <Accordion.Title
-            active={isCodeVisible}
-            onClick={() => setCodeVisibility(!isCodeVisible)}
-          >
-            <Icon name="dropdown" />
-            View
-          </Accordion.Title>
-          <Accordion.Content active={isCodeVisible}>
-            {gistFile.content}
-          </Accordion.Content>
-        </Accordion>
+        <Card.Description>
+          <Accordion>
+            <Accordion.Title active={!!code} onClick={handleOnClick}>
+              <Icon name="dropdown" />
+              View
+            </Accordion.Title>
+            <Accordion.Content active={!!code}>
+              <Loader active={loading} inline="centered" />
+              <Message hidden={!error} content={error} negative />
+              <pre>
+                <code className={gistFile.language}>{code}</code>
+              </pre>
+            </Accordion.Content>
+          </Accordion>
+        </Card.Description>
       </Card.Content>
     </Card>
   );
