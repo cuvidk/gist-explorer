@@ -190,9 +190,10 @@ export const GistList = () => {
 
   return (
     <Container>
-      <Header content="Gist Explorer" />
+      <Header className="header" content="Gist Explorer" />
       <Form error={!!state.error}>
         <Form.Input
+          className="usernameBar"
           placeholder="Search by username..."
           icon="search"
           onChange={delayedOnChange}
