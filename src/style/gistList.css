@@ -1,12 +1,7 @@
-.loadMoreBtn {
-  padding-top: 10px;
-  padding-bottom: 10px;
+div.ui.header:first-child {
+  margin-top: 10px;
 }
 
-.usernameBar {
-  padding-bottom: 10px;
-}
-
-.errorMessage {
-  padding-bottom: 10px;
+button.ui.button {
+  margin-top: 20px;
 }

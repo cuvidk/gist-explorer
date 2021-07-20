@@ -46,7 +46,6 @@ const initialState: GistListState = {
 };
 
 const reducer = (state: GistListState, action: ActionGistList) => {
-  console.log(action);
   switch (action.type) {
     case "FETCH_FIRST":
       return {
@@ -190,18 +189,22 @@ export const GistList = () => {
 
   return (
     <Container>
-      <Header className="header" content="Gist Explorer" />
+      <Header content="Gist Explorer" />
       <Form error={!!state.error}>
         <Form.Input
-          className="usernameBar"
           placeholder="Search by username..."
           icon="search"
           onChange={delayedOnChange}
         />
         <Message error header="Oups!" content={state.error} />
+        <Message
+          info
+          header="Such Empty"
+          content="No gists found for the specified user"
+          hidden={state.loading || state.gistFiles.length > 0 || !!state.error}
+        />
         <Card.Group>{items}</Card.Group>
         <Form.Button
-          className="loadMoreBtn"
           onClick={onClick}
           fluid
           loading={state.loading}
