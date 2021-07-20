@@ -39,13 +39,11 @@ export const Gist = ({ gistFile }: GistComponentProps) => {
         // add support for authenticated req
       });
 
-      console.log(resp);
-
       if (typeof resp.data === "string") {
         setCode(resp.data);
       } else {
         // for whatever reason, if the raw file is a json,
-        // it's parsed to an object by the octokit request lib
+        // it's parsed to an object by the axios request lib
         setCode(JSON.stringify(resp.data));
       }
     } catch (err) {
